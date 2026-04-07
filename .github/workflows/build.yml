@@ -16,13 +16,14 @@ jobs:
 
       - name: Install System Dependencies
         run: |
+          sudo dpkg --add-architecture i386
           sudo apt update
           sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev \
           libncurses-dev cmake libffi-dev libssl-dev \
           libsqlite3-dev tk-dev uuid-dev libgdbm-dev liblzma-dev \
           libvulkan-dev vulkan-tools libsdl2-dev libsdl2-image-dev \
           libsdl2-mixer-dev libsdl2-ttf-dev openjdk-17-jdk \
-          patch m4 texinfo lib32z1 lib32stdc++6
+          patch m4 texinfo libc6:i386 libncurses6:i386 libstdc++6:i386 libz1:i386
 
       - name: Install Buildozer and Cython
         run: |
