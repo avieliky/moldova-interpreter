@@ -3,7 +3,6 @@ models/
 .buildozer/
 bin/
 __pycache__/
-*.spec
 .DS_Store
 *.apk
 *.gguf
