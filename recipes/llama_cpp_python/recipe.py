@@ -9,25 +9,22 @@ class LlamaCppPythonRecipe(CppCompiledComponentsPythonRecipe):
     def get_recipe_env(self, arch):
         env = super().get_recipe_env(arch)
         
-        # Disable auto-detection of 'native' architecture which fails in cross-compile
+        # Completely disable native detection and OpenMP (which can be unstable)
         env['GGML_NATIVE'] = 'OFF'
-        env['GGML_OPENMP'] = 'OFF' # OpenMP can be tricky on Android, disabling for stability
-        
-        # Enable Vulkan for your S24 Ultra GPU
+        env['GGML_OPENMP'] = 'OFF'
         env['GGML_VULKAN'] = '1'
         
-        # Target ARM64 explicitly
-        env['GGML_CPU_ALL_VARIANTS'] = '1'
-        
-        # Point to Android's Vulkan loader
+        # Force the CMake arguments directly into the environment
         env['CMAKE_ARGS'] = (
-            f"-DGGML_VULKAN=ON "
-            f"-DGGML_NATIVE=OFF "
-            f"-DGGML_CPU_ARM_V8A=ON "
-            f"-DCMAKE_SYSTEM_NAME=Android "
-            f"-DCMAKE_ANDROID_ARCH_ABI={arch.arch} "
-            f"-DCMAKE_SYSTEM_VERSION=21 "
+            "-DGGML_NATIVE=OFF "
+            "-DGGML_CPU_ARM_V8A=ON "
+            "-DGGML_VULKAN=ON "
+            "-DGGML_OPENMP=OFF "
+            "-DLLAMA_BUILD_SERVER=OFF "
         )
+        
+        # Override any internal scikit-build flags
+        env['SKBUILD_CMAKE_ARGS'] = env['CMAKE_ARGS']
         
         return env
 
