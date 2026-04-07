@@ -11,7 +11,6 @@ import os
 from engine import AudioEngine
 from stt import SpeechToText
 from translator import Translator, VoiceSynthesizer
-from download_models import MODELS, download_file
 
 # UI Layout Definition
 KV = """
@@ -103,13 +102,19 @@ class InterpreterApp(App):
         if not os.path.exists("models"):
             os.makedirs("models")
         threading.Thread(target=self.initial_setup, daemon=True).start()
+        # Clear UI memory every 30 minutes (1800 seconds)
+        Clock.schedule_interval(self.clear_history, 1800)
+
+    def clear_history(self, dt):
+        self.ui.ids.foreign_pane.clear_widgets()
+        self.ui.ids.user_pane.clear_widgets()
+        self.ui.status_text = "History cleared to save memory."
 
     def initial_setup(self):
         # 1. Download missing models
-        for name, url in MODELS.items():
-            if not os.path.exists(os.path.join("models", name)):
-                self.ui.status_text = f"Downloading {name}..."
-                download_file(url, name)
+        self.ui.status_text = "Downloading missing models..."
+        from download_models import download_all
+        download_all()
         
         # 2. Load Models
         self.ui.status_text = "Loading AI models..."
@@ -136,8 +141,8 @@ class InterpreterApp(App):
         translation = self.translator.translate(transcription)
         self.ui.update_chat('top', translation)
         
-        # 3. TTS
-        self.tts.speak(translation)
+        # 3. TTS (Speak the translated English)
+        self.tts.speak(translation, is_romanian=False)
 
 if __name__ == "__main__":
     InterpreterApp().run()

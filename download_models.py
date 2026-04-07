@@ -1,40 +1,44 @@
 import os
-import requests
-from tqdm import tqdm
+from huggingface_hub import hf_hub_download
 
 MODELS = {
-    "silero_vad.onnx": "https://github.com/snakers4/silero-vad/raw/master/files/silero_vad.onnx",
-    "Gemma-2-9B-It-Q4_K_M.gguf": "https://huggingface.co/bartowski/gemma-2-9b-it-GGUF/resolve/main/gemma-2-9b-it-Q4_K_M.gguf",
-    "whisper-large-v3-turbo-ct2/model.bin": "https://huggingface.co/Systran/faster-whisper-large-v3-turbo/resolve/main/model.bin",
-    "whisper-large-v3-turbo-ct2/config.json": "https://huggingface.co/Systran/faster-whisper-large-v3-turbo/resolve/main/config.json",
-    "whisper-large-v3-turbo-ct2/vocabulary.json": "https://huggingface.co/Systran/faster-whisper-large-v3-turbo/resolve/main/vocabulary.json",
-    "piper-ro-low.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ro/ro_RO/mihai/low/ro_RO-mihai-low.onnx",
-    "piper-ro-low.onnx.json": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ro/ro_RO/mihai/low/ro_RO-mihai-low.onnx.json",
-    "piper-en-medium.onnx": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx",
-    "piper-en-medium.onnx.json": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json"
+    "silero_vad.onnx": ("https://github.com/snakers4/silero-vad/raw/master/files/silero_vad.onnx", None),
+    "gemma-2-2b-it-Q4_K_M.gguf": ("bartowski/gemma-2-2b-it-GGUF", "gemma-2-2b-it-Q4_K_M.gguf"),
+    "ro_RO-mihai-medium.onnx": ("rhasspy/piper-voices", "ro/ro_RO/mihai/medium/ro_RO-mihai-medium.onnx"),
+    "ro_RO-mihai-medium.onnx.json": ("rhasspy/piper-voices", "ro/ro_RO/mihai/medium/ro_RO-mihai-medium.onnx.json"),
+    "en_US-lessac-medium.onnx": ("rhasspy/piper-voices", "en/en_US/lessac/medium/en_US-lessac-medium.onnx"),
+    "en_US-lessac-medium.onnx.json": ("rhasspy/piper-voices", "en/en_US/lessac/medium/en_US-lessac-medium.onnx.json"),
 }
 
-def download_file(url, filename):
-    path = os.path.join("models", filename)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-        
-    print(f"Downloading {filename}...")
-    response = requests.get(url, stream=True)
-    total_size = int(response.headers.get('content-length', 0))
-    
-    with open(path, "wb") as f, tqdm(
-        desc=filename,
-        total=total_size,
-        unit='iB',
-        unit_scale=True,
-        unit_divisor=1024,
-    ) as bar:
-        for data in response.iter_content(chunk_size=1024):
-            size = f.write(data)
-            bar.update(size)
-
-if __name__ == "__main__":
+def download_all():
     if not os.path.exists("models"):
         os.makedirs("models")
-    for name, url in MODELS.items():
-        download_file(url, name)
+        
+    for local_name, (repo_or_url, filename) in MODELS.items():
+        path = os.path.join("models", local_name)
+        if os.path.exists(path):
+            continue
+            
+        print(f"Downloading {local_name}...")
+        if filename:
+            # HuggingFace download
+            hf_hub_download(
+                repo_id=repo_or_url,
+                filename=filename,
+                local_dir="models",
+                local_dir_use_symlinks=False
+            )
+            # Rename if necessary (hf_hub_download might save with full path)
+            downloaded_path = os.path.join("models", filename)
+            if os.path.exists(downloaded_path) and downloaded_path != path:
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                os.rename(downloaded_path, path)
+        else:
+            # Direct URL download (like Silero)
+            import requests
+            r = requests.get(repo_or_url)
+            with open(path, "wb") as f:
+                f.write(r.content)
+
+if __name__ == "__main__":
+    download_all()

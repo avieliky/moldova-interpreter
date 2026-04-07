@@ -2,23 +2,22 @@ from faster_whisper import WhisperModel
 import os
 
 class SpeechToText:
-    def __init__(self, model_path="models/whisper-large-v3-turbo-ct2"):
-        # CPU setup - using 'auto' will detect multiple cores
-        # 'int8' is used for ARM CPU optimization (NEON instructions)
+    def __init__(self, model_size="large-v3-turbo", download_root="models/whisper-large-v3-turbo-ct2"):
+        # We let faster-whisper handle the download automatically
+        # This is more reliable than manual downloads
         self.model = WhisperModel(
-            model_path, 
+            model_size, 
             device="cpu", 
             compute_type="int8",
-            local_files_only=True
+            download_root=download_root
         )
 
     def transcribe(self, audio_data):
         print("STT: Transcribing chunk...")
-        # language=None allows auto-detection (useful for Romanian vs English)
         segments, info = self.model.transcribe(
             audio_data, 
             beam_size=5, 
-            language="ro", # Force Romanian initially for better Moldovan detection
+            language=None, # Allow auto-detect for Moldovan mix (Ro, Ru, It)
             task="transcribe"
         )
         
