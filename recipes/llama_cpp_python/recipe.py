@@ -1,6 +1,4 @@
 from pythonforandroid.recipe import CppCompiledComponentsPythonRecipe
-from pythonforandroid.util import current_directory
-from os.path import join
 import os
 
 class LlamaCppPythonRecipe(CppCompiledComponentsPythonRecipe):
@@ -10,19 +8,27 @@ class LlamaCppPythonRecipe(CppCompiledComponentsPythonRecipe):
 
     def get_recipe_env(self, arch):
         env = super().get_recipe_env(arch)
-        # Force Vulkan Support
+        
+        # Disable auto-detection of 'native' architecture which fails in cross-compile
+        env['GGML_NATIVE'] = 'OFF'
+        env['GGML_OPENMP'] = 'OFF' # OpenMP can be tricky on Android, disabling for stability
+        
+        # Enable Vulkan for your S24 Ultra GPU
         env['GGML_VULKAN'] = '1'
-        # NDK specific flags for Snapdragon 8 Gen 3
-        env['CFLAGS'] += ' -O3 -fPIC'
-        env['CXXFLAGS'] += ' -O3 -fPIC -std=c++17'
+        
+        # Target ARM64 explicitly
+        env['GGML_CPU_ALL_VARIANTS'] = '1'
+        
+        # Point to Android's Vulkan loader
+        env['CMAKE_ARGS'] = (
+            f"-DGGML_VULKAN=ON "
+            f"-DGGML_NATIVE=OFF "
+            f"-DGGML_CPU_ARM_V8A=ON "
+            f"-DCMAKE_SYSTEM_NAME=Android "
+            f"-DCMAKE_ANDROID_ARCH_ABI={arch.arch} "
+            f"-DCMAKE_SYSTEM_VERSION=21 "
+        )
+        
         return env
-
-    def build_arch(self, arch):
-        # We need to ensure llama.cpp is built within the context of the NDK
-        with current_directory(self.get_build_dir(arch.arch)):
-            env = self.get_recipe_env(arch)
-            # Use pip's setup logic but with our NDK environment
-            self.setup_libs(arch)
-            super().build_arch(arch)
 
 recipe = LlamaCppPythonRecipe()
