@@ -18,7 +18,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,json,onnx,gguf,bin,txt
 
 # (str) Custom environment variables to set during build
-env.export = GGML_NATIVE=OFF, GGML_OPENMP=OFF, GGML_VULKAN=ON, SKBUILD_CMAKE_ARGS="-DGGML_NATIVE=OFF -DGGML_OPENMP=OFF -DGGML_VULKAN=ON -DLLAMA_NATIVE=OFF -DLLAMA_BUILD_SERVER=OFF -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a -DCMAKE_SYSTEM_VERSION=21"
+env.export = CFLAGS="-IC:\Users\aviel/.buildozer/android/platform/android-ndk-r25b/sysroot/usr/include/aarch64-linux-android -D__ANDROID_API__=21", LDFLAGS="-LC:\Users\aviel/.buildozer/android/platform/android-ndk-r25b/sysroot/usr/lib/aarch64-linux-android/21", CC="C:\Users\aviel/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang", CXX="C:\Users\aviel/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++", AR="C:\Users\aviel/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar", RANLIB="C:\Users\aviel/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib", STRIP="C:\Users\aviel/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip", LD="C:\Users\aviel/.buildozer/android/platform/android-ndk-r25b/toolchains/llvm/prebuilt/linux-x86_64/bin/ld", SKBUILD_CMAKE_ARGS="-DGGML_VULKAN=OFF -DGGML_CPU_ARM_V8A=ON -DLLAMA_NATIVE=OFF -DLLAMA_BUILD_SERVER=OFF -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a -DCMAKE_SYSTEM_VERSION=21"
 
 # (list) Application requirements
 # Note: torch is huge, swapped for onnxruntime
@@ -59,4 +59,5 @@ log_level = 2
 
 # (int) Display warning if buildozer is run as root (0 = false, 1 = true)
 warn_on_root = 1
+
 
