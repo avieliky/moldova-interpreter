@@ -22,7 +22,7 @@ jobs:
           libsqlite3-dev tk-dev uuid-dev libgdbm-dev liblzma-dev \
           libvulkan-dev vulkan-tools libsdl2-dev libsdl2-image-dev \
           libsdl2-mixer-dev libsdl2-ttf-dev openjdk-17-jdk \
-          patch m4 texinfo lib32z1 lib32stdc++6
+          patch m4 texinfo lib32z1 lib32stdc++6 ninja-build
 
       - name: Install Buildozer and Cython
         run: |
@@ -32,7 +32,10 @@ jobs:
       - name: Build with Buildozer
         run: |
           mkdir -p ~/.android && touch ~/.android/repositories.cfg
-          yes | buildozer -v android debug
+          # Accept licenses explicitly using the SDK manager
+          export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
+          # Buildozer handles its own SDK but pre-accepting everything helps
+          buildozer -v android debug --yes
         env:
           BUILDOZER_ALLOW_ORG_NAME_START_WITH_DIGIT: 1
 
