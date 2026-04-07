@@ -18,14 +18,14 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,json,onnx,gguf,bin,txt
 
 # (str) Custom environment variables to set during build
-env.export = GGML_NATIVE=OFF, GGML_OPENMP=OFF, GGML_VULKAN=ON, SKBUILD_CMAKE_ARGS="-DGGML_NATIVE=OFF -DGGML_OPENMP=OFF -DGGML_VULKAN=ON -DLLAMA_NATIVE=OFF"
+env.export = GGML_NATIVE=OFF, GGML_OPENMP=OFF, GGML_VULKAN=ON, SKBUILD_CMAKE_ARGS="-DGGML_NATIVE=OFF -DGGML_OPENMP=OFF -DGGML_VULKAN=ON -DLLAMA_NATIVE=OFF -DLLAMA_BUILD_SERVER=OFF -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a -DCMAKE_SYSTEM_VERSION=21"
 
 # (list) Application requirements
 # Note: torch is huge, swapped for onnxruntime
 requirements = python3, kivy, android, plyer, numpy, llama-cpp-python, requests, tqdm
 
 # (str) Custom source folders for p4a recipes
-p4a.local_recipes = ./recipes
+# p4a.local_recipes = ./recipes
 
 # (list) Permissions
 android.permissions = RECORD_AUDIO, MODIFY_AUDIO_SETTINGS, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, INTERNET
@@ -59,3 +59,4 @@ log_level = 2
 
 # (int) Display warning if buildozer is run as root (0 = false, 1 = true)
 warn_on_root = 1
+
