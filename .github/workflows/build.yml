@@ -31,7 +31,8 @@ jobs:
 
       - name: Build with Buildozer
         run: |
-          buildozer -v android debug --yes
+          mkdir -p ~/.android && touch ~/.android/repositories.cfg
+          yes | buildozer -v android debug
         env:
           BUILDOZER_ALLOW_ORG_NAME_START_WITH_DIGIT: 1
 
