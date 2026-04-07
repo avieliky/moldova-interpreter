@@ -1,0 +1,11 @@
+# Exclude models and build artifacts
+models/
+.buildozer/
+bin/
+__pycache__/
+*.spec
+.DS_Store
+*.apk
+*.gguf
+*.onnx
+*.bin
