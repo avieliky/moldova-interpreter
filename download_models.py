@@ -3,6 +3,7 @@ import requests
 from tqdm import tqdm
 
 MODELS = {
+    "silero_vad.onnx": "https://github.com/snakers4/silero-vad/raw/master/files/silero_vad.onnx",
     "Gemma-2-9B-It-Q4_K_M.gguf": "https://huggingface.co/bartowski/gemma-2-9b-it-GGUF/resolve/main/gemma-2-9b-it-Q4_K_M.gguf",
     "whisper-large-v3-turbo-ct2/model.bin": "https://huggingface.co/Systran/faster-whisper-large-v3-turbo/resolve/main/model.bin",
     "whisper-large-v3-turbo-ct2/config.json": "https://huggingface.co/Systran/faster-whisper-large-v3-turbo/resolve/main/config.json",

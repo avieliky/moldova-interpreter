@@ -21,7 +21,8 @@ jobs:
           libncurses-dev cmake libffi-dev libssl-dev \
           libsqlite3-dev tk-dev uuid-dev libgdbm-dev liblzma-dev \
           libvulkan-dev vulkan-tools libsdl2-dev libsdl2-image-dev \
-          libsdl2-mixer-dev libsdl2-ttf-dev openjdk-17-jdk
+          libsdl2-mixer-dev libsdl2-ttf-dev openjdk-17-jdk \
+          patch m4 texinfo lib32z1 lib32stdc++6
 
       - name: Install Buildozer and Cython
         run: |

@@ -19,7 +19,7 @@ source.include_exts = py,png,jpg,kv,json,onnx,gguf,bin,txt
 
 # (list) Application requirements
 # Note: torch is huge, swapped for onnxruntime
-requirements = python3, kivy, numpy, sounddevice, onnxruntime-gpu, llama-cpp-python, requests, tqdm
+requirements = python3, kivy, numpy, sounddevice, onnxruntime, faster-whisper, llama-cpp-python, requests, tqdm, soundfile
 
 # (str) Custom source folders for p4a recipes
 p4a.local_recipes = ./recipes

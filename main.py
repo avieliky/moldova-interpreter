@@ -6,7 +6,12 @@ from kivy.properties import BooleanProperty, StringProperty
 from kivy.clock import Clock
 from kivy.lang import Builder
 import threading
+import os
+
 from engine import AudioEngine
+from stt import SpeechToText
+from translator import Translator, VoiceSynthesizer
+from download_models import MODELS, download_file
 
 # UI Layout Definition
 KV = """
@@ -19,7 +24,6 @@ KV = """
             size: self.size
             pos: self.pos
 
-    # Foreign Speaker Pane (Top)
     ScrollView:
         BoxLayout:
             id: foreign_pane
@@ -35,7 +39,6 @@ KV = """
                     size: self.size
                     pos: self.pos
 
-    # Glow Indicator for VAD
     Widget:
         size_hint_y: None
         height: '4dp'
@@ -46,7 +49,6 @@ KV = """
                 pos: self.pos
                 size: self.size
 
-    # User Pane (Bottom)
     ScrollView:
         BoxLayout:
             id: user_pane
@@ -62,7 +64,6 @@ KV = """
                     size: self.size
                     pos: self.pos
 
-    # Status Bar
     Label:
         text: root.status_text
         size_hint_y: None
@@ -76,7 +77,9 @@ class InterpreterUI(BoxLayout):
     status_text = StringProperty("Initializing models...")
 
     def update_chat(self, side, text):
-        # side: 'top' (Foreign) or 'bottom' (User)
+        Clock.schedule_once(lambda dt: self._update_chat_ui(side, text))
+
+    def _update_chat_ui(self, side, text):
         label = Label(
             text=text, 
             size_hint_y=None, 
@@ -85,14 +88,10 @@ class InterpreterUI(BoxLayout):
             valign='middle'
         )
         label.bind(texture_size=label.setter('size'))
-        
         if side == 'top':
             self.ids.foreign_pane.add_widget(label)
         else:
             self.ids.user_pane.add_widget(label)
-
-from download_models import MODELS, download_file
-import os
 
 class InterpreterApp(App):
     def build(self):
@@ -101,37 +100,44 @@ class InterpreterApp(App):
         return self.ui
 
     def on_start(self):
-        # Ensure models are present
         if not os.path.exists("models"):
             os.makedirs("models")
-            
-        threading.Thread(target=self.initial_download, daemon=True).start()
+        threading.Thread(target=self.initial_setup, daemon=True).start()
 
-    def initial_download(self):
+    def initial_setup(self):
+        # 1. Download missing models
         for name, url in MODELS.items():
             if not os.path.exists(os.path.join("models", name)):
                 self.ui.status_text = f"Downloading {name}..."
                 download_file(url, name)
         
-        self.ui.status_text = "Models loaded. Starting..."
-        # Start Audio Engine after models are verified
-        self.audio_engine = AudioEngine(stt_callback=self.process_stt)
-        threading.Thread(target=self.audio_engine.start_stream, daemon=True).start()
+        # 2. Load Models
+        self.ui.status_text = "Loading AI models..."
+        self.stt = SpeechToText()
+        self.translator = Translator()
+        self.tts = VoiceSynthesizer()
         
-        # Monitor VAD status for the UI glow
+        # 3. Start Audio Engine
+        self.ui.status_text = "Ready"
+        self.audio_engine = AudioEngine(stt_callback=self.process_pipeline)
+        threading.Thread(target=self.audio_engine.start_stream, daemon=True).start()
         Clock.schedule_interval(self.update_status, 0.1)
 
     def update_status(self, dt):
         self.ui.is_listening = self.audio_engine.is_recording
-        if self.ui.is_listening:
-            self.ui.status_text = "Listening..."
-        else:
-            self.ui.status_text = "Ready"
 
-    def process_stt(self, audio_data):
-        # This will be implemented based on your STT choice
-        print("STT: Processing chunk...")
-        pass
+    def process_pipeline(self, audio_data):
+        # 1. STT
+        transcription = self.stt.transcribe(audio_data)
+        if not transcription: return
+        self.ui.update_chat('bottom', f"Detected: {transcription}")
+        
+        # 2. LLM Translation
+        translation = self.translator.translate(transcription)
+        self.ui.update_chat('top', translation)
+        
+        # 3. TTS
+        self.tts.speak(translation)
 
 if __name__ == "__main__":
     InterpreterApp().run()
