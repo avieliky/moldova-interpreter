@@ -3,24 +3,35 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container:
-      image: kivy/buildozer:latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Fix Permissions
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install System Dependencies
         run: |
-          # The Docker container runs as root, but Buildozer prefers a non-root user
-          # We'll adjust permissions to ensure the build can proceed
-          chown -R user:user .
+          sudo apt update
+          sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev \
+          libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev \
+          libsqlite3-dev tk-dev uuid-dev libgdbm-dev liblzma-dev \
+          libvulkan-dev vulkan-tools libsdl2-dev libsdl2-image-dev \
+          libsdl2-mixer-dev libsdl2-ttf-dev openjdk-17-jdk \
+          patch m4 texinfo lib32z1 lib32stdc++6
+
+      - name: Install Buildozer and Cython
+        run: |
+          pip install --upgrade pip
+          pip install buildozer cython==0.29.33
 
       - name: Build with Buildozer
         run: |
-          # Run as the 'user' already present in the Kivy Docker image
-          su user -c "buildozer -v android debug --yes"
+          buildozer -v android debug --yes
         env:
           BUILDOZER_ALLOW_ORG_NAME_START_WITH_DIGIT: 1
 
