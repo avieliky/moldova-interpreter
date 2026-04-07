@@ -18,7 +18,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,json,onnx,gguf,bin,txt
 
 # (str) Custom environment variables to set during build
-env.export = GGML_NATIVE=OFF, GGML_OPENMP=OFF, GGML_VULKAN=ON, SKBUILD_CMAKE_ARGS="-DGGML_NATIVE=OFF -DGGML_OPENMP=OFF -DGGML_VULKAN=ON"
+env.export = GGML_NATIVE=OFF, GGML_OPENMP=OFF, GGML_VULKAN=ON, SKBUILD_CMAKE_ARGS="-DGGML_NATIVE=OFF -DGGML_OPENMP=OFF -DGGML_VULKAN=ON -DLLAMA_NATIVE=OFF"
 
 # (list) Application requirements
 # Note: torch is huge, swapped for onnxruntime
