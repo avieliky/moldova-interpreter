@@ -8,7 +8,6 @@ from kivy.lang import Builder
 import threading
 import os
 
-from engine import AudioEngine
 from stt import SpeechToText
 from translator import Translator, VoiceSynthesizer
 
@@ -122,19 +121,19 @@ class InterpreterApp(App):
         self.translator = Translator()
         self.tts = VoiceSynthesizer()
         
-        # 3. Start Audio Engine
-        self.ui.status_text = "Ready"
-        self.audio_engine = AudioEngine(stt_callback=self.process_pipeline)
-        threading.Thread(target=self.audio_engine.start_stream, daemon=True).start()
-        Clock.schedule_interval(self.update_status, 0.1)
+        # 3. Start Audio Pipeline
+        self.ui.status_text = "Ready - Tap to Start"
+        # note: Android SoundRecognizer must be called from Main thread, 
+        # so we schedule it or attach it to a button later.
+        Clock.schedule_once(self.start_listening, 1)
 
-    def update_status(self, dt):
-        self.ui.is_listening = self.audio_engine.is_recording
+    def start_listening(self, dt=None):
+        self.ui.is_listening = True
+        transcription = self.stt.transcribe()
+        if transcription:
+            threading.Thread(target=self.process_pipeline, args=(transcription,), daemon=True).start()
 
-    def process_pipeline(self, audio_data):
-        # 1. STT
-        transcription = self.stt.transcribe(audio_data)
-        if not transcription: return
+    def process_pipeline(self, transcription):
         self.ui.update_chat('bottom', f"Detected: {transcription}")
         
         # 2. LLM Translation

@@ -22,7 +22,7 @@ env.export = GGML_NATIVE=OFF, GGML_OPENMP=OFF, GGML_VULKAN=ON, SKBUILD_CMAKE_ARG
 
 # (list) Application requirements
 # Note: torch is huge, swapped for onnxruntime
-requirements = python3, kivy, numpy, sounddevice, onnxruntime, faster-whisper, llama-cpp-python, requests, tqdm, soundfile
+requirements = python3, kivy, numpy, llama-cpp-python, requests, tqdm
 
 # (str) Custom source folders for p4a recipes
 p4a.local_recipes = ./recipes
